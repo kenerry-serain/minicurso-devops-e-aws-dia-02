@@ -14,33 +14,62 @@ variable "assume_role" {
 
   default = {
     region   = "us-west-1"
-    role_arn = "<YOUR_ROLE_ARN>"
+    role_arn = "<YOUR_ROLE>"
   }
 }
 
-variable "queues" {
-  type = list(object({
-    name                      = string
-    delay_seconds             = number
-    max_message_size          = number
-    message_retention_seconds = number
-    receive_wait_time_seconds = number
-  }))
+variable "vpc" {
+  type = object({
+    name                     = string
+    cidr_block               = string
+    internet_gateway_name    = string
+    nat_gateway_name         = string
+    public_route_table_name  = string
+    private_route_table_name = string
+    public_subnets = list(object({
+      name                    = string
+      cidr_block              = string
+      availability_zone       = string
+      map_public_ip_on_launch = bool
+    }))
+    private_subnets = list(object({
+      name                    = string
+      cidr_block              = string
+      availability_zone       = string
+      map_public_ip_on_launch = bool
+    }))
+  })
 
-  default = [
-    {
-      name                      = "devops-na-nuvem-queue-01"
-      delay_seconds             = 90
-      max_message_size          = 2048
-      message_retention_seconds = 86400
-      receive_wait_time_seconds = 10
-    },
-    {
-      name                      = "devops-na-nuvem-queue-02"
-      delay_seconds             = 90
-      max_message_size          = 2048
-      message_retention_seconds = 86400
-      receive_wait_time_seconds = 10
-    },
-  ]
+  default = {
+    name                     = "devops-na-nuvem-vpc"
+    cidr_block               = "10.0.0.0/24"
+    internet_gateway_name    = "internet-gateway"
+    nat_gateway_name         = "nat-gateway"
+    public_route_table_name  = "public-route-table"
+    private_route_table_name = "private-route-table"
+    public_subnets = [{
+      name                    = "public-us-west-1a"
+      cidr_block              = "10.0.0.0/26"
+      availability_zone       = "us-west-1a"
+      map_public_ip_on_launch = true
+      },
+      {
+        name                    = "public-us-west-1c"
+        cidr_block              = "10.0.0.64/26"
+        availability_zone       = "us-west-1c"
+        map_public_ip_on_launch = true
+    }]
+    private_subnets = [{
+      name                    = "private-us-west-1a"
+      cidr_block              = "10.0.0.128/26"
+      availability_zone       = "us-west-1a"
+      map_public_ip_on_launch = false
+      },
+      {
+        name                    = "private-us-west-1c"
+        cidr_block              = "10.0.0.192/26"
+        availability_zone       = "us-west-1c"
+        map_public_ip_on_launch = false
+    }]
+  }
 }
